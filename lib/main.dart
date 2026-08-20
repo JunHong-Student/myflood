@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'core/providers/flood_data_provider.dart';
+import 'core/providers/favorites_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'screens/splash/splash_screen.dart';
 
@@ -10,6 +11,7 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => FloodDataProvider()),
+        ChangeNotifierProvider(create: (_) => FavoritesProvider()..loadFavorites()),
       ],
       child: const MyFloodApp(),
     ),

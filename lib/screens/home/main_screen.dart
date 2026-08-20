@@ -4,6 +4,7 @@ import '../../core/widgets/app_shell.dart';
 import '../auth/login_screen.dart';
 import 'dashboard_screen.dart';
 import 'flood_records_screen.dart';
+import 'favorites_screen.dart';
 import 'flood_map_screen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -52,9 +53,7 @@ class _MainScreenState extends State<MainScreen> {
         return const FloodRecordsScreen();
 
       case 2:
-        return const Center(
-          child: Text('Flood Rates'),
-        );
+        return const FavoritesScreen();
 
       case 3:
         return const FloodMapScreen();

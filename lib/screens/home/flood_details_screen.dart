@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../core/models/flood_data.dart';
+import '../../core/providers/favorites_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_card.dart';
@@ -16,6 +18,9 @@ class FloodDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final favoritesProvider = context.watch<FavoritesProvider>();
+    final isFavorite = favoritesProvider.isFavorite(floodData.stationId);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -26,6 +31,17 @@ class FloodDetailsScreen extends StatelessWidget {
           style: AppTextStyles.title,
         ),
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
+        actions: [
+          IconButton(
+            icon: Icon(
+              isFavorite ? Icons.favorite : Icons.favorite_border,
+              color: isFavorite ? AppColors.critical : AppColors.textPrimary,
+            ),
+            onPressed: () {
+              favoritesProvider.toggleFavorite(floodData.stationId);
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),

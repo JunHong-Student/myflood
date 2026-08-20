@@ -19,14 +19,14 @@ class AppShell extends StatelessWidget {
   static const List<String> navigationLabels = [
     'Dashboard',
     'Flood Records',
-    'Flood Rates',
+    'Favorites',
     'Flood Map',
   ];
 
   static const List<IconData> navigationIcons = [
     Icons.dashboard_outlined,
     Icons.list_alt_outlined,
-    Icons.bar_chart_outlined,
+    Icons.favorite_border_outlined,
     Icons.map_outlined,
   ];
 
