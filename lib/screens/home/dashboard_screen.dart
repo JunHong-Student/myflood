@@ -1,15 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../core/providers/flood_data_provider.dart';
+import '../../core/models/flood_data.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/status_badge.dart';
+import 'flood_details_screen.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
   @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = context.read<FloodDataProvider>();
+      if (provider.floodData.isEmpty) {
+        provider.fetchFloodData();
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final provider = context.watch<FloodDataProvider>();
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -44,7 +66,7 @@ class DashboardScreen extends StatelessWidget {
               SizedBox(width: 5),
 
               Text(
-                'Last updated: Today, 10:30 AM',
+                'Live Government Telemetry Data',
                 style: AppTextStyles.caption,
               ),
             ],
@@ -53,50 +75,77 @@ class DashboardScreen extends StatelessWidget {
           const SizedBox(height: 20),
 
           // ==========================================
-          // SUMMARY CARDS
+          // DYNAMIC CONTENT
           // ==========================================
+          
+          if (provider.isLoading && provider.floodData.isEmpty)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(32.0),
+                child: CircularProgressIndicator(),
+              ),
+            )
+          else if (provider.errorMessage != null && provider.floodData.isEmpty)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Column(
+                  children: [
+                    const Icon(Icons.error_outline, color: AppColors.critical, size: 48),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Failed to load data',
+                      style: AppTextStyles.heading,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      provider.errorMessage!,
+                      style: AppTextStyles.bodySecondary,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () => provider.fetchFloodData(),
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else ...[
+            // ==========================================
+            // SUMMARY CARDS
+            // ==========================================
 
-          _buildSummaryGrid(),
+            _buildSummaryGrid(provider.floodData),
 
-          const SizedBox(height: 24),
+            const SizedBox(height: 24),
 
-          // ==========================================
-          // ACTIVE FLOOD EVENTS
-          // ==========================================
+            // ==========================================
+            // ACTIVE FLOOD EVENTS
+            // ==========================================
 
-          const Text(
-            'Active Flood Events',
-            style: AppTextStyles.heading,
-          ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Active Flood Events',
+                  style: AppTextStyles.heading,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.refresh, color: AppColors.primaryBlue),
+                  onPressed: () => provider.fetchFloodData(),
+                  tooltip: 'Refresh Data',
+                ),
+              ],
+            ),
 
-          const SizedBox(height: 12),
+            const SizedBox(height: 12),
 
-          _buildFloodEvent(
-            location: 'Kuala Lumpur',
-            river: 'Sungai Klang',
-            status: FloodStatus.critical,
-            affected: '1,240 people affected',
-          ),
+            _buildActiveFloodEvents(provider.floodData),
 
-          const SizedBox(height: 10),
-
-          _buildFloodEvent(
-            location: 'Kota Bharu, Kelantan',
-            river: 'Sungai Kelantan',
-            status: FloodStatus.warning,
-            affected: '860 people affected',
-          ),
-
-          const SizedBox(height: 10),
-
-          _buildFloodEvent(
-            location: 'Kuantan, Pahang',
-            river: 'Sungai Pahang',
-            status: FloodStatus.advisory,
-            affected: '320 people affected',
-          ),
-
-          const SizedBox(height: 24),
+            const SizedBox(height: 24),
+          ],
 
           // ==========================================
           // QUICK ACTIONS
@@ -163,7 +212,21 @@ class DashboardScreen extends StatelessWidget {
   // SUMMARY GRID
   // ==========================================
 
-  Widget _buildSummaryGrid() {
+  Widget _buildSummaryGrid(List<FloodData> data) {
+    int dangerCount = 0;
+    int warningCount = 0;
+    int alertCount = 0;
+
+    for (var station in data) {
+      if (station.waterLevelIndicator == 'DANGER') {
+        dangerCount++;
+      } else if (station.waterLevelIndicator == 'WARNING') {
+        warningCount++;
+      } else if (station.waterLevelIndicator == 'ALERT') {
+        alertCount++;
+      }
+    }
+
     return GridView.count(
       crossAxisCount: 2,
       crossAxisSpacing: 10,
@@ -174,30 +237,30 @@ class DashboardScreen extends StatelessWidget {
       children: [
         _buildSummaryCard(
           title: 'Critical Alerts',
-          value: '1',
+          value: dangerCount.toString(),
           color: AppColors.critical,
           icon: Icons.warning_rounded,
         ),
 
         _buildSummaryCard(
           title: 'Warnings',
-          value: '2',
+          value: warningCount.toString(),
           color: AppColors.warning,
           icon: Icons.warning_amber_rounded,
         ),
 
         _buildSummaryCard(
           title: 'Advisories',
-          value: '2',
+          value: alertCount.toString(),
           color: AppColors.advisory,
           icon: Icons.info_outline,
         ),
 
         _buildSummaryCard(
-          title: 'People Affected',
-          value: '34,200',
+          title: 'Total Stations', // Replaced "People Affected"
+          value: data.length.toString(),
           color: AppColors.primaryBlue,
-          icon: Icons.people_outline,
+          icon: Icons.sensors,
         ),
       ],
     );
@@ -263,20 +326,96 @@ class DashboardScreen extends StatelessWidget {
   }
 
   // ==========================================
-  // FLOOD EVENT CARD
+  // ACTIVE FLOOD EVENTS
   // ==========================================
+
+  Widget _buildActiveFloodEvents(List<FloodData> data) {
+    // Filter to only show events that are not NORMAL and have a valid indicator
+    final activeEvents = data.where((station) {
+      final ind = station.waterLevelIndicator;
+      return ind != null && ind != 'NORMAL' && ind != 'NO_RAINFALL';
+    }).toList();
+
+    if (activeEvents.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 24.0),
+        child: Center(
+          child: Text(
+            'No active flood events reported at this time.',
+            style: AppTextStyles.bodySecondary,
+          ),
+        ),
+      );
+    }
+
+    // Sort by severity (DANGER first)
+    activeEvents.sort((a, b) {
+      int score(String? ind) {
+        if (ind == 'DANGER') return 3;
+        if (ind == 'WARNING') return 2;
+        if (ind == 'ALERT') return 1;
+        return 0;
+      }
+      return score(b.waterLevelIndicator).compareTo(score(a.waterLevelIndicator));
+    });
+
+    // Take top 5 for the dashboard to avoid massive list
+    final displayEvents = activeEvents.take(5).toList();
+
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: displayEvents.length,
+      separatorBuilder: (_, _) => const SizedBox(height: 10),
+      itemBuilder: (context, index) {
+        final event = displayEvents[index];
+        final status = _mapApiStatusToEnum(event.waterLevelIndicator);
+        
+        final levelText = event.waterLevelCurrent != null 
+            ? 'Water Level: ${event.waterLevelCurrent}m' 
+            : 'Data unavailable';
+            
+        return _buildFloodEvent(
+          location: '${event.stationName}, ${event.district}',
+          river: event.mainBasin,
+          status: status,
+          affected: levelText, // Replaced "people affected"
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => FloodDetailsScreen(floodData: event),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  FloodStatus _mapApiStatusToEnum(String? apiIndicator) {
+    switch (apiIndicator) {
+      case 'DANGER':
+        return FloodStatus.critical;
+      case 'WARNING':
+        return FloodStatus.warning;
+      case 'ALERT':
+        return FloodStatus.advisory;
+      default:
+        return FloodStatus.normal;
+    }
+  }
 
   Widget _buildFloodEvent({
     required String location,
     required String river,
     required FloodStatus status,
     required String affected,
+    required VoidCallback onTap,
   }) {
     return AppCard(
       padding: const EdgeInsets.all(14),
-      onTap: () {
-        // Later: Navigate to Flood Details
-      },
+      onTap: onTap,
       child: Row(
         children: [
           Container(
