@@ -15,6 +15,33 @@ class FloodAnalyticsScreen extends StatefulWidget {
 }
 
 class _FloodAnalyticsScreenState extends State<FloodAnalyticsScreen> {
+  static const Map<String, String> _stateCodes = {
+    'Johor': 'JHR',
+    'Kedah': 'KDH',
+    'Kelantan': 'KTN',
+    'Melaka': 'MLK',
+    'Negeri Sembilan': 'NSN',
+    'Pahang': 'PHG',
+    'Perak': 'PRK',
+    'Perlis': 'PLS',
+    'Pulau Pinang': 'PNG',
+    'Sabah': 'SBH',
+    'Sarawak': 'SWK',
+    'Selangor': 'SGR',
+    'Terengganu': 'TRG',
+    'WP Kuala Lumpur': 'KUL',
+    'Wilayah Persekutuan Kuala Lumpur': 'KUL',
+  };
+
+  String _getStateAbbreviation(String stateName) {
+    for (final entry in _stateCodes.entries) {
+      if (entry.key.toLowerCase() == stateName.toLowerCase()) {
+        return entry.value;
+      }
+    }
+    return stateName;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -124,7 +151,7 @@ class _FloodAnalyticsScreenState extends State<FloodAnalyticsScreen> {
                           child: Transform.rotate(
                             angle: -0.5,
                             child: Text(
-                              sortedEntries[value.toInt()].key,
+                              _getStateAbbreviation(sortedEntries[value.toInt()].key),
                               style: const TextStyle(
                                 color: AppColors.textSecondary,
                                 fontSize: 9,
@@ -191,10 +218,10 @@ class _FloodAnalyticsScreenState extends State<FloodAnalyticsScreen> {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return const Center(
+          return Center(
             child: Text(
-              'Error loading historical data',
-              style: TextStyle(color: AppColors.critical),
+              'Error loading historical data: ${snapshot.error}',
+              style: const TextStyle(color: AppColors.critical),
             ),
           );
         }
@@ -239,7 +266,7 @@ class _FloodAnalyticsScreenState extends State<FloodAnalyticsScreen> {
                           child: Transform.rotate(
                             angle: -0.5,
                             child: Text(
-                              sortedEntries[value.toInt()].key,
+                              _getStateAbbreviation(sortedEntries[value.toInt()].key),
                               style: const TextStyle(
                                 color: AppColors.textSecondary,
                                 fontSize: 9,
@@ -305,10 +332,10 @@ class _FloodAnalyticsScreenState extends State<FloodAnalyticsScreen> {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return const Center(
+          return Center(
             child: Text(
-              'Error loading seasonal data',
-              style: TextStyle(color: AppColors.critical),
+              'Error loading seasonal data: ${snapshot.error}',
+              style: const TextStyle(color: AppColors.critical),
             ),
           );
         }
