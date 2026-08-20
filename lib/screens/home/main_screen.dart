@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/widgets/app_shell.dart';
 import '../auth/login_screen.dart';
 import 'dashboard_screen.dart';
+import 'flood_records_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -47,9 +48,7 @@ class _MainScreenState extends State<MainScreen> {
         return const DashboardScreen();
 
       case 1:
-        return const Center(
-          child: Text('Flood Records'),
-        );
+        return const FloodRecordsScreen();
 
       case 2:
         return const Center(
