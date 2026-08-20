@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "749141808939",
+    "project_id": "myflood-malaysia",
+    "storage_bucket": "myflood-malaysia.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:749141808939:android:a91d13cd366e4f2b67176e",
+        "android_client_info": {
+          "package_name": "tarc.edu.my.myflood"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBpjBx-z9trKS1DZdF6rex36wklpWSLPL0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

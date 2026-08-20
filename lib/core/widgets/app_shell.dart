@@ -21,6 +21,7 @@ class AppShell extends StatelessWidget {
     'Flood Records',
     'Favorites',
     'Flood Map',
+    'Analytics',
   ];
 
   static const List<IconData> navigationIcons = [
@@ -28,6 +29,7 @@ class AppShell extends StatelessWidget {
     Icons.list_alt_outlined,
     Icons.favorite_border_outlined,
     Icons.map_outlined,
+    Icons.analytics_outlined,
   ];
 
   @override

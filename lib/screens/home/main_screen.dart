@@ -6,6 +6,7 @@ import 'dashboard_screen.dart';
 import 'flood_records_screen.dart';
 import 'favorites_screen.dart';
 import 'flood_map_screen.dart';
+import 'flood_analytics_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -57,6 +58,9 @@ class _MainScreenState extends State<MainScreen> {
 
       case 3:
         return const FloodMapScreen();
+        
+      case 4:
+        return const FloodAnalyticsScreen();
 
       default:
         return const DashboardScreen();
