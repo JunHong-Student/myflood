@@ -1,0 +1,25 @@
+{
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "myflood-malaysia",
+          "appId": "1:749141808939:android:a91d13cd366e4f2b67176e",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "myflood-malaysia",
+          "configurations": {
+            "android": "1:749141808939:android:a91d13cd366e4f2b67176e",
+            "ios": "1:749141808939:ios:ea3e4e0baae4a00967176e"
+          }
+        }
+      }
+    }
+  }
+}
