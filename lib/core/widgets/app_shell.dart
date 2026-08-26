@@ -22,6 +22,7 @@ class AppShell extends StatelessWidget {
     'Favorites',
     'Flood Map',
     'Analytics',
+    'Emergency',
   ];
 
   static const List<IconData> navigationIcons = [
@@ -30,6 +31,7 @@ class AppShell extends StatelessWidget {
     Icons.favorite_border_outlined,
     Icons.map_outlined,
     Icons.analytics_outlined,
+    Icons.phone_outlined,
   ];
 
   @override
@@ -59,13 +61,16 @@ class AppShell extends StatelessWidget {
                   const SizedBox(width: 16),
 
                   // App name
-                  const Expanded(
-                    child: Text(
-                      'MyFlood Malaysia',
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => onNavigationChanged(0),
+                      child: const Text(
+                        'MyFlood Malaysia',
+                        style: TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                   ),

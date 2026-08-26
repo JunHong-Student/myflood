@@ -7,6 +7,7 @@ import 'flood_records_screen.dart';
 import 'favorites_screen.dart';
 import 'flood_map_screen.dart';
 import 'flood_analytics_screen.dart';
+import 'emergency_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -48,7 +49,13 @@ class _MainScreenState extends State<MainScreen> {
   Widget _buildPage() {
     switch (currentIndex) {
       case 0:
-        return const DashboardScreen();
+        return DashboardScreen(
+          onTabSwitch: (index) {
+            setState(() {
+              currentIndex = index;
+            });
+          },
+        );
 
       case 1:
         return const FloodRecordsScreen();
@@ -61,6 +68,9 @@ class _MainScreenState extends State<MainScreen> {
         
       case 4:
         return const FloodAnalyticsScreen();
+
+      case 5:
+        return const EmergencyScreen();
 
       default:
         return const DashboardScreen();

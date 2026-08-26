@@ -10,7 +10,8 @@ import '../../core/widgets/status_badge.dart';
 import 'flood_details_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+  final Function(int)? onTabSwitch;
+  const DashboardScreen({super.key, this.onTabSwitch});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -164,7 +165,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: _buildQuickAction(
                   icon: Icons.search,
                   title: 'Search Records',
-                  onTap: () {},
+                  onTap: () => widget.onTabSwitch?.call(1),
                 ),
               ),
 
@@ -174,7 +175,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: _buildQuickAction(
                   icon: Icons.map_outlined,
                   title: 'Flood Map',
-                  onTap: () {},
+                  onTap: () => widget.onTabSwitch?.call(3),
                 ),
               ),
             ],
@@ -188,7 +189,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: _buildQuickAction(
                   icon: Icons.bar_chart_outlined,
                   title: 'Statistics',
-                  onTap: () {},
+                  onTap: () => widget.onTabSwitch?.call(4),
                 ),
               ),
 
@@ -198,7 +199,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: _buildQuickAction(
                   icon: Icons.phone_outlined,
                   title: 'Emergency',
-                  onTap: () {},
+                  onTap: () => widget.onTabSwitch?.call(5),
                 ),
               ),
             ],
