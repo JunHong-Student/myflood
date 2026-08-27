@@ -24,6 +24,13 @@ class FavoritesProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> clearAll() async {
+    final prefs = await SharedPreferences.getInstance();
+    _favoriteIds.clear();
+    await prefs.setStringList(_prefsKey, _favoriteIds);
+    notifyListeners();
+  }
+
   bool isFavorite(String stationId) {
     return _favoriteIds.contains(stationId);
   }

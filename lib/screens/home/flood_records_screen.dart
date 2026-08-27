@@ -16,10 +16,11 @@ class FloodRecordsScreen extends StatefulWidget {
 }
 
 class _FloodRecordsScreenState extends State<FloodRecordsScreen> {
+  final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String _selectedStatusFilter = 'ALL';
 
-  final List<String> _statusFilters = ['ALL', 'DANGER', 'WARNING', 'ALERT', 'NORMAL'];
+  final List<String> _statusFilters = ['ALL', 'DANGER', 'ALERT', 'NORMAL'];
 
   @override
   void initState() {
@@ -33,12 +34,21 @@ class _FloodRecordsScreenState extends State<FloodRecordsScreen> {
   }
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final provider = context.watch<FloodDataProvider>();
 
-    return Column(
-      children: [
-        // ==========================================
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      behavior: HitTestBehavior.opaque,
+      child: Column(
+        children: [
+          // ==========================================
         // HEADER & SEARCH BAR
         // ==========================================
         Container(
@@ -54,10 +64,22 @@ class _FloodRecordsScreenState extends State<FloodRecordsScreen> {
               
               // Search Input
               TextField(
+                controller: _searchController,
                 decoration: InputDecoration(
                   hintText: 'Search station, district, state, river...',
                   hintStyle: AppTextStyles.bodySecondary,
                   prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
+                  suffixIcon: _searchQuery.isNotEmpty 
+                      ? IconButton(
+                          icon: const Icon(Icons.clear, color: AppColors.textSecondary),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() {
+                              _searchQuery = '';
+                            });
+                          },
+                        )
+                      : null,
                   filled: true,
                   fillColor: AppColors.card,
                   contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
@@ -132,6 +154,7 @@ class _FloodRecordsScreenState extends State<FloodRecordsScreen> {
           child: _buildRecordsList(provider),
         ),
       ],
+      ),
     );
   }
 
@@ -188,9 +211,22 @@ class _FloodRecordsScreenState extends State<FloodRecordsScreen> {
               style: AppTextStyles.heading,
             ),
             const SizedBox(height: 8),
-            Text(
-              'Try adjusting your search or filters',
+            const Text(
+              'Try adjusting your search or filter.',
               style: AppTextStyles.bodySecondary,
+            ),
+            const SizedBox(height: 16),
+            TextButton.icon(
+              onPressed: () {
+                _searchController.clear();
+                setState(() {
+                  _searchQuery = '';
+                  _selectedStatusFilter = 'ALL';
+                });
+                provider.fetchFloodData();
+              },
+              icon: const Icon(Icons.clear_all),
+              label: const Text('Clear Filters'),
             ),
           ],
         ),
@@ -199,6 +235,7 @@ class _FloodRecordsScreenState extends State<FloodRecordsScreen> {
 
     return ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       itemCount: filteredData.length,
       separatorBuilder: (_, _) => const SizedBox(height: 10),
       itemBuilder: (context, index) {

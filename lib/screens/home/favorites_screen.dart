@@ -38,9 +38,23 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       children: [
         Container(
           padding: const EdgeInsets.all(16),
-          child: const Text(
-            'Saved Stations',
-            style: AppTextStyles.title,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Saved Stations',
+                style: AppTextStyles.title,
+              ),
+              if (favoritesProvider.favoriteIds.isNotEmpty)
+                TextButton.icon(
+                  onPressed: () => _showClearConfirmation(context, favoritesProvider),
+                  icon: const Icon(Icons.delete_outline, size: 18),
+                  label: const Text('Clear All'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.critical,
+                  ),
+                ),
+            ],
           ),
         ),
         Expanded(
@@ -190,5 +204,30 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       case FloodStatus.critical:
         return AppColors.critical;
     }
+  }
+
+  void _showClearConfirmation(BuildContext context, FavoritesProvider provider) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Remove all saved stations?'),
+          content: const Text('This action cannot be undone.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                provider.clearAll();
+                Navigator.of(context).pop();
+              },
+              child: const Text('Clear', style: TextStyle(color: AppColors.critical)),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

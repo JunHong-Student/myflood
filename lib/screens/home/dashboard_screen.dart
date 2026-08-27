@@ -159,50 +159,56 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           const SizedBox(height: 12),
 
-          Row(
-            children: [
-              Expanded(
-                child: _buildQuickAction(
-                  icon: Icons.search,
-                  title: 'Search Records',
-                  onTap: () => widget.onTabSwitch?.call(1),
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: _buildQuickAction(
+                    icon: Icons.search,
+                    title: 'Search Records',
+                    onTap: () => widget.onTabSwitch?.call(1),
+                  ),
                 ),
-              ),
 
-              const SizedBox(width: 10),
+                const SizedBox(width: 10),
 
-              Expanded(
-                child: _buildQuickAction(
-                  icon: Icons.map_outlined,
-                  title: 'Flood Map',
-                  onTap: () => widget.onTabSwitch?.call(3),
+                Expanded(
+                  child: _buildQuickAction(
+                    icon: Icons.map_outlined,
+                    title: 'Flood Map',
+                    onTap: () => widget.onTabSwitch?.call(3),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
 
           const SizedBox(height: 10),
 
-          Row(
-            children: [
-              Expanded(
-                child: _buildQuickAction(
-                  icon: Icons.bar_chart_outlined,
-                  title: 'Statistics',
-                  onTap: () => widget.onTabSwitch?.call(4),
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: _buildQuickAction(
+                    icon: Icons.bar_chart_outlined,
+                    title: 'Statistics',
+                    onTap: () => widget.onTabSwitch?.call(4),
+                  ),
                 ),
-              ),
 
-              const SizedBox(width: 10),
+                const SizedBox(width: 10),
 
-              Expanded(
-                child: _buildQuickAction(
-                  icon: Icons.phone_outlined,
-                  title: 'Emergency',
-                  onTap: () => widget.onTabSwitch?.call(5),
+                Expanded(
+                  child: _buildQuickAction(
+                    icon: Icons.phone_outlined,
+                    title: 'Emergency',
+                    onTap: () => widget.onTabSwitch?.call(5),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
@@ -215,14 +221,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildSummaryGrid(List<FloodData> data) {
     int dangerCount = 0;
-    int warningCount = 0;
+    int normalCount = 0;
     int alertCount = 0;
 
     for (var station in data) {
       if (station.waterLevelIndicator == 'DANGER') {
         dangerCount++;
-      } else if (station.waterLevelIndicator == 'WARNING') {
-        warningCount++;
+      } else if (station.waterLevelIndicator == 'NORMAL') {
+        normalCount++;
       } else if (station.waterLevelIndicator == 'ALERT') {
         alertCount++;
       }
@@ -234,7 +240,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       mainAxisSpacing: 10,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      childAspectRatio: 1.7,
+      childAspectRatio: 1.5,
       children: [
         _buildSummaryCard(
           title: 'Critical Alerts',
@@ -244,10 +250,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
 
         _buildSummaryCard(
-          title: 'Warnings',
-          value: warningCount.toString(),
-          color: AppColors.warning,
-          icon: Icons.warning_amber_rounded,
+          title: 'Normal',
+          value: normalCount.toString(),
+          color: AppColors.normal,
+          icon: Icons.check_circle_outline,
         ),
 
         _buildSummaryCard(
@@ -495,6 +501,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Text(
               title,
               style: AppTextStyles.body,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
 

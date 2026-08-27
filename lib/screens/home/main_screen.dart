@@ -17,7 +17,20 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  late PageController _pageController;
   int currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: currentIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,11 +41,38 @@ class _MainScreenState extends State<MainScreen> {
         setState(() {
           currentIndex = index;
         });
+        _pageController.jumpToPage(index);
       },
 
       onLogout: _logout,
 
-      body: _buildPage(),
+      body: PageView(
+        controller: _pageController,
+        physics: currentIndex == 3 
+            ? const NeverScrollableScrollPhysics() 
+            : const BouncingScrollPhysics(),
+        onPageChanged: (index) {
+          FocusScope.of(context).unfocus();
+          setState(() {
+            currentIndex = index;
+          });
+        },
+        children: [
+          DashboardScreen(
+            onTabSwitch: (index) {
+              setState(() {
+                currentIndex = index;
+              });
+              _pageController.jumpToPage(index);
+            },
+          ),
+          const FloodRecordsScreen(),
+          const FavoritesScreen(),
+          const FloodMapScreen(),
+          const FloodAnalyticsScreen(),
+          const EmergencyScreen(),
+        ],
+      ),
     );
   }
 
@@ -44,36 +84,5 @@ class _MainScreenState extends State<MainScreen> {
       ),
           (route) => false,
     );
-  }
-
-  Widget _buildPage() {
-    switch (currentIndex) {
-      case 0:
-        return DashboardScreen(
-          onTabSwitch: (index) {
-            setState(() {
-              currentIndex = index;
-            });
-          },
-        );
-
-      case 1:
-        return const FloodRecordsScreen();
-
-      case 2:
-        return const FavoritesScreen();
-
-      case 3:
-        return const FloodMapScreen();
-        
-      case 4:
-        return const FloodAnalyticsScreen();
-
-      case 5:
-        return const EmergencyScreen();
-
-      default:
-        return const DashboardScreen();
-    }
   }
 }

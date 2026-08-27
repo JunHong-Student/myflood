@@ -5,7 +5,6 @@ import 'package:fl_chart/fl_chart.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/providers/flood_data_provider.dart';
-import '../../core/models/flood_data.dart';
 
 class FloodAnalyticsScreen extends StatefulWidget {
   const FloodAnalyticsScreen({super.key});

@@ -50,14 +50,8 @@ class _FloodMapScreenState extends State<FloodMapScreen> {
           options: MapOptions(
             initialCenter: _centerMalaysia,
             initialZoom: 5.5,
-            minZoom: 5.5, // Prevent zooming out to see the whole world
+            minZoom: 4.0, // Relaxed to allow zooming out slightly on tall screens
             maxZoom: 18.0,
-            cameraConstraint: CameraConstraint.contain(
-              bounds: LatLngBounds(
-                const LatLng(0.0, 99.0), // South-West (Sumatra area)
-                const LatLng(8.0, 120.0), // North-East (Sabah/Philippines border area)
-              ),
-            ),
             onTap: (_, _) {
               // Dismiss selected station on map tap
               if (_selectedStation != null) {
