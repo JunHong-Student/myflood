@@ -4,6 +4,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_text_field.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../home/main_screen.dart';
 import 'register_screen.dart';
 
@@ -17,6 +18,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -25,16 +27,69 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _login() {
-    // Temporary login for UI testing.
-    // Later this will connect to Firebase Authentication.
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const MainScreen(),
+  void _showError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppColors.critical,
       ),
     );
+  }
+
+  Future<void> _login() async {
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+
+    if (email.isEmpty) {
+      _showError('Please enter your email address.');
+      return;
+    }
+    
+    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+    if (!emailRegex.hasMatch(email)) {
+      _showError('Please enter a valid email address.');
+      return;
+    }
+
+    if (password.isEmpty) {
+      _showError('Please enter your password.');
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const MainScreen(),
+          ),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found' || e.code == 'invalid-credential' || e.code == 'wrong-password') {
+        _showError('Invalid email or password.');
+      } else {
+        _showError(e.message ?? 'An error occurred during sign in.');
+      }
+    } catch (e) {
+      _showError('Failed to sign in. Please try again.');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   void _openRegister() {
@@ -43,6 +98,82 @@ class _LoginScreenState extends State<LoginScreen> {
       MaterialPageRoute(
         builder: (_) => const RegisterScreen(),
       ),
+    );
+  }
+
+  Future<void> _resetPassword(String email, BuildContext dialogContext) async {
+    final emailText = email.trim();
+    if (emailText.isEmpty) {
+      _showError('Please enter your email address.');
+      return;
+    }
+
+    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+    if (!emailRegex.hasMatch(emailText)) {
+      _showError('Please enter a valid email address.');
+      return;
+    }
+
+    Navigator.pop(dialogContext); // Close dialog before starting the network call.
+
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: emailText);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('If an account exists for this email, a password reset link has been sent. Please check your inbox.'),
+            backgroundColor: AppColors.normal,
+          ),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        _showError('No user found for that email address.');
+      } else {
+        _showError(e.message ?? 'Failed to send password reset email.');
+      }
+    } catch (e) {
+      _showError('An error occurred. Please try again.');
+    }
+  }
+
+  void _showForgotPasswordDialog() {
+    final resetEmailController = TextEditingController(text: emailController.text);
+    
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Reset Password'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Enter your email address to receive a password reset link.',
+                style: AppTextStyles.bodySecondary,
+              ),
+              const SizedBox(height: 16),
+              AppTextField(
+                hintText: 'Email address',
+                controller: resetEmailController,
+                keyboardType: TextInputType.emailAddress,
+                prefixIcon: Icons.email_outlined,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => _resetPassword(resetEmailController.text, dialogContext),
+              child: const Text('Send Email'),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -170,9 +301,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: () {
-                        // Later: Forgot password screen
-                      },
+                      onPressed: _showForgotPasswordDialog,
                       child: const Text(
                         'Forgot password?',
                         style: TextStyle(
@@ -189,10 +318,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   // SIGN IN
                   // ==========================================
 
-                  AppButton(
-                    text: 'SIGN IN',
-                    onPressed: _login,
-                  ),
+                  _isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : AppButton(
+                          text: 'SIGN IN',
+                          onPressed: _login,
+                        ),
 
                   const SizedBox(height: 24),
 

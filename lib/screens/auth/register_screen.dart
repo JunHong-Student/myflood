@@ -5,6 +5,8 @@ import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_text_field.dart';
 
+import 'package:firebase_auth/firebase_auth.dart';
+
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -17,6 +19,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -27,19 +30,86 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  void _register() {
-    // Temporary registration.
-    // Later this will connect to Firebase Authentication/database.
-
+  void _showError(String message) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Registration successful. Please sign in.',
-        ),
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppColors.critical,
       ),
     );
+  }
 
-    Navigator.pop(context);
+  Future<void> _register() async {
+    final name = nameController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+    final confirmPassword = confirmPasswordController.text.trim();
+
+    if (name.isEmpty) {
+      _showError('Please enter your full name.');
+      return;
+    }
+
+    if (email.isEmpty) {
+      _showError('Please enter your email address.');
+      return;
+    }
+    
+    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+    if (!emailRegex.hasMatch(email)) {
+      _showError('Please enter a valid email address.');
+      return;
+    }
+
+    if (password.isEmpty) {
+      _showError('Please enter a password.');
+      return;
+    }
+
+    if (password != confirmPassword) {
+      _showError('Passwords do not match.');
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      
+      // Update display name
+      await userCredential.user?.updateDisplayName(name);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Registration successful. Please sign in.'),
+          ),
+        );
+        Navigator.pop(context);
+      }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'weak-password') {
+        _showError('The password provided is too weak.');
+      } else if (e.code == 'email-already-in-use') {
+        _showError('The account already exists for that email.');
+      } else {
+        _showError(e.message ?? 'An error occurred during registration.');
+      }
+    } catch (e) {
+      _showError('Failed to register. Please try again.');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -134,10 +204,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               const SizedBox(height: 28),
 
-              AppButton(
-                text: 'CREATE ACCOUNT',
-                onPressed: _register,
-              ),
+              _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : AppButton(
+                      text: 'CREATE ACCOUNT',
+                      onPressed: _register,
+                    ),
             ],
           ),
         ),
