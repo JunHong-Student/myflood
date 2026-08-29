@@ -15,15 +15,15 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => FloodDataProvider()),
-        ChangeNotifierProvider(create: (_) => FavoritesProvider()..loadFavorites()),
-      ],
-      child: const MyFloodApp(),
-    ),
-  );
+    runApp(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => FloodDataProvider()),
+          ChangeNotifierProvider(create: (_) => FavoritesProvider()),
+        ],
+        child: const MyFloodApp(),
+      ),
+    );
 }
 
 class MyFloodApp extends StatelessWidget {

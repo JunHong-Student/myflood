@@ -37,7 +37,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -57,6 +57,17 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             ],
           ),
         ),
+        SwitchListTile(
+          title: const Text('Flood Alerts', style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+          subtitle: const Text('Receive alerts for your saved stations', style: AppTextStyles.caption),
+          value: favoritesProvider.alertsEnabled,
+          onChanged: (bool value) {
+            favoritesProvider.toggleAlerts(value);
+          },
+          activeTrackColor: AppColors.primaryBlue,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+        ),
+        const Divider(color: AppColors.card, thickness: 2, height: 2),
         Expanded(
           child: _buildFavoritesList(floodProvider, favoritesProvider),
         ),

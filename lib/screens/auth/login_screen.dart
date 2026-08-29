@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_text_field.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../home/main_screen.dart';
 import 'register_screen.dart';
 
@@ -19,6 +20,20 @@ class _LoginScreenState extends State<LoginScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _rememberMe = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRememberMe();
+  }
+
+  Future<void> _loadRememberMe() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _rememberMe = prefs.getBool('remember_me') ?? true;
+    });
+  }
 
   @override
   void dispose() {
@@ -298,18 +313,44 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 12),
 
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: _showForgotPasswordDialog,
-                      child: const Text(
-                        'Forgot password?',
-                        style: TextStyle(
-                          color: AppColors.primaryBlue,
-                          fontSize: 12,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Checkbox(
+                            value: _rememberMe,
+                            onChanged: (bool? value) {
+                              setState(() {
+                                _rememberMe = value ?? true;
+                              });
+                              SharedPreferences.getInstance().then((prefs) {
+                                prefs.setBool('remember_me', _rememberMe);
+                              });
+                            },
+                            activeColor: AppColors.primaryBlue,
+                            side: const BorderSide(color: AppColors.textSecondary),
+                          ),
+                          const Text(
+                            'Remember Me',
+                            style: TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                      TextButton(
+                        onPressed: _showForgotPasswordDialog,
+                        child: const Text(
+                          'Forgot password?',
+                          style: TextStyle(
+                            color: AppColors.primaryBlue,
+                            fontSize: 12,
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
 
                   const SizedBox(height: 12),

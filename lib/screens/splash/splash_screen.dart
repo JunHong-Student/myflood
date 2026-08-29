@@ -1,10 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../auth/login_screen.dart';
+import '../home/main_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -32,7 +35,18 @@ class _SplashScreenState extends State<SplashScreen>
       curve: Curves.easeInOut,
     );
 
-    Timer(const Duration(seconds: 4), () {
+    Timer(const Duration(seconds: 4), () async {
+      if (!mounted) return;
+
+      final prefs = await SharedPreferences.getInstance();
+      final rememberMe = prefs.getBool('remember_me') ?? true;
+      
+      if (!rememberMe) {
+        await FirebaseAuth.instance.signOut();
+      }
+
+      final user = FirebaseAuth.instance.currentUser;
+      
       if (!mounted) return;
 
       _animationController.forward().then((_) {
@@ -41,7 +55,7 @@ class _SplashScreenState extends State<SplashScreen>
         Navigator.pushReplacement(
           context,
           PageRouteBuilder(
-            pageBuilder: (_, __, ___) => const LoginScreen(),
+            pageBuilder: (_, __, ___) => user != null ? const MainScreen() : const LoginScreen(),
             transitionDuration: const Duration(milliseconds: 500),
             transitionsBuilder: (_, animation, __, child) {
               return FadeTransition(
