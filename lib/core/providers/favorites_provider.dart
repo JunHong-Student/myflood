@@ -48,12 +48,14 @@ class FavoritesProvider extends ChangeNotifier {
       _favoriteIds.remove(stationId);
       notifyListeners();
       await docRef.set({
+        'email': user.email,
         'favorites': FieldValue.arrayRemove([stationId])
       }, SetOptions(merge: true));
     } else {
       _favoriteIds.add(stationId);
       notifyListeners();
       await docRef.set({
+        'email': user.email,
         'favorites': FieldValue.arrayUnion([stationId])
       }, SetOptions(merge: true));
     }
@@ -68,6 +70,7 @@ class FavoritesProvider extends ChangeNotifier {
 
     final docRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
     await docRef.set({
+      'email': user.email,
       'alertsEnabled': value
     }, SetOptions(merge: true));
   }
@@ -81,6 +84,7 @@ class FavoritesProvider extends ChangeNotifier {
 
     final docRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
     await docRef.set({
+      'email': user.email,
       'favorites': []
     }, SetOptions(merge: true));
   }
